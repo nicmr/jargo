@@ -1,6 +1,7 @@
 mod commands;
+mod jargotoml;
 
-use clap::{Arg, App, SubCommand,};
+use clap::{Arg, App,};
 
 fn main() {
 
@@ -33,7 +34,7 @@ fn main() {
     }
 
     if matches.is_present("run"){
-        commands::run();
+        commands::run_project("");
     }
 }
 

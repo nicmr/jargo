@@ -1,8 +1,10 @@
+use std::env;
+use crate::jargotoml;
+
 /// Creates a new project directory, src subfolder and jango.toml
 ///
 pub fn new_project(project_name: &str) -> std::io::Result<()> {
-    use std::env;
-    use std::fs::{self, DirBuilder, File};
+    use std::fs::{DirBuilder, File};
     use std::io::Write;
 
     //try to create the project directory, check if dir of name already exists
@@ -17,22 +19,27 @@ pub fn new_project(project_name: &str) -> std::io::Result<()> {
 
     
     //create jargo.toml
-    let tomlpath = root.clone();
+    let mut tomlpath = root.clone();
     tomlpath.push("jargo");
     tomlpath.set_extension("toml");
 
     //create src dir
-    let srcpath = root.clone();
+    let mut srcpath = root.clone();
     srcpath.push("src");
 
     //because the directory is guaranteed to not already contain a similarly named folder
-    //(we just created it), and we can't handle the obscure errors that may still cause it to fail,
+    //(we just created it), and we can't handle the obscure (fs) errors that may still cause it to fail,
     // it is okay to cascade the ? here instead of matching the result it in place.
     DirBuilder::new().create(srcpath)?;
 
+    let mut targetpath = root.clone();
+    targetpath.push("target");
+    //see src dir creation
+    DirBuilder::new().create(targetpath);
+
 
     //create Main.java
-    let mainpath = root.clone();
+    let mut mainpath = root.clone();
     mainpath.push("src");
     mainpath.push("Main");
     mainpath.set_extension("java");
@@ -46,9 +53,28 @@ br#"class Main{
 }
 "#)?;
 
+    Ok(())
+}
 
+/// Check if the current directory contains a valid project and run it
+pub fn run_project(pass_args: &str) -> std::io::Result<()> {
+    //consider using different result type
 
-
+    use std::fs;
+    
+    //iterate through current dir
+    let current_dir = env::current_dir()?;
+    if let Ok(entries) = fs::read_dir(current_dir){
+        for entry in entries { 
+            if let Ok(entry) = entry {
+                if entry.file_name() == "jargo.toml" {
+                    println!("valid project root found");
+                    jargotoml::parse_file(entry.path());
+                }
+            }
+        }
+    }
+    
 
     Ok(())
 }
