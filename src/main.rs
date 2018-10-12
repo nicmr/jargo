@@ -24,6 +24,18 @@ fn main() {
                             .case_insensitive(true)
                             .takes_value(false)
                             .help("runs the current jango project"))
+                        .arg(Arg::with_name("build")
+                            .short("b")
+                            .long("build")
+                            .case_insensitive(true)
+                            .takes_value(false)
+                            .help("builds the current jango project"))
+                        .arg(Arg::with_name("clean")
+                            .short("c")
+                            .long("clean")
+                            .case_insensitive(true)
+                            .takes_value(false)
+                            .help("cleans the current jango project target directory"))
                         .get_matches();
                 
 
@@ -33,8 +45,24 @@ fn main() {
         };
     }
 
+    //TODO: add {new, run, build} to mutually exclusive group
+
     if matches.is_present("run"){
-        commands::run_project("");
+        if let Err(_) = commands::run_project(""){
+            println!("Failed to run project.")
+        }
+    }
+
+    if matches.is_present("build"){
+        if let Err(_) = commands::build_project(""){
+            println!("Failed to build project.")
+        }
+    }
+
+    if matches.is_present("clean"){
+        if let Err(_) = commands::build_project(""){
+            println!("Failed to clean project.")
+        }
     }
 }
 
