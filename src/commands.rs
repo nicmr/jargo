@@ -1,5 +1,8 @@
 use std::env;
+use std::fs;
+use std::io;
 use crate::jargotoml;
+use crate::jargotoml::{Project};
 use std::path::PathBuf;
 
 /// Creates a new project directory, src subfolder and jango.toml
@@ -36,7 +39,7 @@ pub fn new_project(project_name: &str) -> std::io::Result<()> {
     let mut targetpath = root.clone();
     targetpath.push("target");
     //see src dir creation
-    DirBuilder::new().create(targetpath);
+    DirBuilder::new().create(targetpath)?;
 
 
     //create Main.java
@@ -45,7 +48,7 @@ pub fn new_project(project_name: &str) -> std::io::Result<()> {
     mainpath.push("Main");
     mainpath.set_extension("java");
 
-    let mut f = File::create(root)?;
+    let mut f = File::create(mainpath)?;
     f.write_all(
 br#"class Main{
     public static void main (String[] args){
@@ -61,50 +64,50 @@ br#"class Main{
 pub fn run_project(pass_args: &str) -> std::io::Result<()> {
     //TODO: consider using different result type
 
-    use std::fs;
-
     let current_dir = env::current_dir()?;
 
 
-    //1. validate current directory
-    if let Ok(_) = check_project(current_dir){
-        //2. compile project
-        compile_project(current_dir)
+    //1. validate and compile
+    if let Ok(project) = compile_project(current_dir, String::from("")){
+        //2. run
+
+        
     }
     
 
-    //3. run java
     
 
     Ok(())
 }
 
-///Checks if the current directory contains a valid project and compiles it
-pub fn compile_project(path: PathBuf, compiler_flags: String) -> std::io::Result<()> {
+/// Checks if the current directory contains a valid project and compiles it
+pub fn compile_project(path: PathBuf, compiler_flags: String) -> std::io::Result<Project> {
 
+    let project = check_project(path)?;
+    project.compile()?;
+    Ok(project)
 }
 
 
-///Checks if the current directory contains a valid project
-pub fn check_project(path: PathBuf) -> std::io::Result<()> {
-
-
-    //iterate through current dir
-    if let Ok(entries) = fs::read_dir(current_dir){
-        for entry in entries { 
-            if let Ok(entry) = entry {
-                //search for jargo.toml
-                if entry.file_name() == "jargo.toml" {
-                    println!("valid project root found");
-                    jargotoml::parse_file(entry.path());
-                }
+/// Checks if the current directory contains a valid project
+pub fn check_project(path: PathBuf) -> std::io::Result<Project> {
+    // iterate through current dirs
+   
+    let entries = fs::read_dir(path)?;
+    for entry in entries {
+        if let Ok(entry) = entry {
+            //search for jargo.toml
+            if entry.file_name() == "jargo.toml" {
+                println!("valid project root found");
+                return Ok(jargotoml::parse_file(entry.path())?);
             }
         }
     }
+    Err(io::Error::new(io::ErrorKind::NotFound, "unable to find project in current dir"))
 }
 
 /// Checks if the current directory contains a valid project, parses the toml and
 // cleans the target directory
 pub fn clean_project(path: PathBuf) -> std::io::Result<()> { 
-    
+    Ok(())
 }

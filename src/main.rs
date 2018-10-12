@@ -2,11 +2,12 @@ mod commands;
 mod jargotoml;
 
 use clap::{Arg, App,};
+use std::path::PathBuf;
 
 fn main() {
 
-    let matches = App::new("Jango - a minimalist java project manager")
-                        .version("0.1")
+    let matches = App::new("Jargo - a minimalist java project manager")
+                        .version("0.0.1")
                         .author("Nicolas Mohr <Nico.Mohr@gmx.net")
                         .about("Runs, tests and configures your javaproject from the command line")
                         //jargo --new PROJECT_NAME
@@ -24,12 +25,14 @@ fn main() {
                             .case_insensitive(true)
                             .takes_value(false)
                             .help("runs the current jango project"))
+                        //jargo --build
                         .arg(Arg::with_name("build")
                             .short("b")
                             .long("build")
                             .case_insensitive(true)
                             .takes_value(false)
                             .help("builds the current jango project"))
+                        //jargo --clean
                         .arg(Arg::with_name("clean")
                             .short("c")
                             .long("clean")
@@ -40,8 +43,13 @@ fn main() {
                 
 
     if let Some(projname) = matches.value_of("new") {
-        if let Err(_) = commands::new_project(projname){
-            println!("Failed to create project.");
+        match commands::new_project(projname){
+            Ok(_) => {
+                println!("successfully created project");
+            }
+            Err(e) => {
+                println!("Failed to create project. Error: {:?}", e);
+            }
         };
     }
 
@@ -54,13 +62,13 @@ fn main() {
     }
 
     if matches.is_present("build"){
-        if let Err(_) = commands::build_project(""){
-            println!("Failed to build project.")
+        if let Err(_) = commands::compile_project(PathBuf::from(""), String::from("")){
+            println!("Failed to compile project.")
         }
     }
 
     if matches.is_present("clean"){
-        if let Err(_) = commands::build_project(""){
+        if let Err(_) = commands::clean_project(PathBuf::from("")){
             println!("Failed to clean project.")
         }
     }
