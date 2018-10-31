@@ -1,8 +1,8 @@
 use std::env;
 use std::fs;
 use std::io;
-use crate::jargotoml;
-use crate::jargotoml::{Project};
+use crate::project;
+use crate::project::{Project, ProjectBuilder};
 use std::path::PathBuf;
 
 /// Creates a new project directory, src subfolder and jango.toml
@@ -21,18 +21,33 @@ pub fn new_project(project_name: &str) -> std::io::Result<()> {
         return Err(e);
     };
 
-    
-    //create jargo.toml
+
+    //create Project struct
+    let project = ProjectBuilder::new(project_name.to_string()).build();
+
+    //create jargo.toml, which stores a serialized version of the project struct
     let mut tomlpath = root.clone();
     tomlpath.push("jargo");
     tomlpath.set_extension("toml");
+    let mut toml = File::create(tomlpath)?;
+
+    let serialized = project.serialize();
+    match serialized{
+        Ok(string) => toml.write_all(string.as_bytes())?,
+        Err(e) => {
+            println!("failed to serialise project settings. error message: {}", e)
+        }
+    }
+
+
+
 
     //create src dir
     let mut srcpath = root.clone();
     srcpath.push("src");
 
     //because the directory is guaranteed to not already contain a similarly named folder
-    //(we just created it), and we can't handle the obscure (fs) errors that may still cause it to fail,
+    // (we just created it)
     // it is okay to cascade the ? here instead of matching the result it in place.
     DirBuilder::new().create(srcpath)?;
 
@@ -93,13 +108,13 @@ pub fn compile_project(path: PathBuf, compiler_flags: String) -> std::io::Result
 pub fn check_project(path: PathBuf) -> std::io::Result<Project> {
     // iterate through current dirs
    
-    let entries = fs::read_dir(path)?;
+    let entries = fs::read_dir(path.clone())?;
     for entry in entries {
         if let Ok(entry) = entry {
             //search for jargo.toml
             if entry.file_name() == "jargo.toml" {
-                println!("valid project root found");
-                return Ok(jargotoml::parse_file(entry.path())?);
+                println!("valid project toml found at: {:?}", entry.path());
+                return Ok(project::parse_file(entry.path())?);
             }
         }
     }

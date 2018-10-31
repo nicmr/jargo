@@ -1,5 +1,4 @@
 use serde_derive::{Serialize, Deserialize};
-use toml;
 
 ///Reads the specified file to a String and parses it by calling `parse()`
 pub fn parse_file(path: std::path::PathBuf) -> std::io::Result<Project>{
@@ -20,7 +19,7 @@ pub fn parse(contents: &str) -> Project{
 
     //TODO: add better error handling
     let project: Project = toml::from_str(contents).unwrap();
-    println!("{}", project.name);
+    println!("Project name: {}", project.name);
     project
 }
 
@@ -47,6 +46,11 @@ impl Project{
     pub fn compile(&self) -> std::io::Result<()> {
         Ok(())
     }
+
+    pub fn serialize(&self) -> std::result::Result<String, toml::ser::Error> {
+        let tomlstring = toml::to_string(&self)?;
+        Ok(tomlstring)
+    }
 }
 
 
@@ -61,8 +65,8 @@ pub struct ProjectBuilder{
 
 impl ProjectBuilder{
     ///Returns a ProjectBuilder with default values, that can be modified and turn into a `Project`
-    pub fn new(name: String) -> Project{
-        Project{
+    pub fn new(name: String) -> ProjectBuilder{
+        ProjectBuilder{
             name,
             src_dir: String::from("src"),
             target_dir: String::from("target"),
@@ -72,19 +76,24 @@ impl ProjectBuilder{
 
     ///Consumes the current `ProjectBuilder` instance and returns a `Project` instance.
     pub fn build(self) -> Project {
-        Project{
-            name: self.name,
-            src_dir: self.src_dir,
-            target_dir: self.target_dir,
-            entry_point: self.entry_point,
-        }
+        Project::new(self.name, self.src_dir, self.target_dir, self.entry_point)
     }
 
     //changes the src directory to the specified subpath, relative to `root`
-    pub fn src(&mut self, subpath: String) -> &mut ProjectBuilder{
+    #[allow(dead_code)]
+    pub fn set_src(&mut self, subpath: String) -> &mut ProjectBuilder{
         self.src_dir = subpath;
         self
     }
-
+    #[allow(dead_code)]
+    pub fn set_target(&mut self, subpath: String) -> &mut ProjectBuilder{
+        self.target_dir = subpath;
+        self
+    }
+    #[allow(dead_code)]
+    pub fn set_entrypoint(&mut self, subpath: String) -> &mut ProjectBuilder{
+        self.entry_point = subpath;
+        self
+    } 
 
 }
