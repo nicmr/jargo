@@ -1,7 +1,6 @@
 use std::env;
 use std::fs;
 use std::io;
-use crate::project;
 use crate::project::{Project, ProjectBuilder};
 use std::path::PathBuf;
 
@@ -114,7 +113,7 @@ pub fn check_project(path: PathBuf) -> std::io::Result<Project> {
             //search for jargo.toml
             if entry.file_name() == "jargo.toml" {
                 println!("valid project toml found at: {:?}", entry.path());
-                return Ok(project::parse_file(entry.path())?);
+                return Ok(Project::parse_file(entry.path())?);
             }
         }
     }

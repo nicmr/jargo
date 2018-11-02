@@ -1,27 +1,6 @@
 use serde_derive::{Serialize, Deserialize};
 
-///Reads the specified file to a String and parses it by calling `parse()`
-pub fn parse_file(path: std::path::PathBuf) -> std::io::Result<Project>{
-    use std::fs::File;
-    use std::io::Read;
 
-    let mut contents = String::new();
-    let mut file = File::open(path)?;
-    file.read_to_string(&mut contents)?;
-    let project = parse(&contents);
-    Ok(project)
-
-}
-
-/// Validates and parses the string and, if possible, returns a Project instance
-//TODO: has to return results
-pub fn parse(contents: &str) -> Project{
-
-    //TODO: add better error handling
-    let project: Project = toml::from_str(contents).unwrap();
-    println!("Project name: {}", project.name);
-    project
-}
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,6 +19,31 @@ impl Project{
             target_dir,
             entry_point,
         }
+    }
+
+
+        ///Reads the specified file to a String and parses it by calling `parse()`
+    pub fn parse_file(path: std::path::PathBuf) -> std::io::Result<Project>{
+        use std::fs::File;
+        use std::io::Read;
+
+        let mut contents = String::new();
+        let mut file = File::open(path)?;
+
+        file.read_to_string(&mut contents)?;
+        let project = Project::parse_string(&contents)?;
+        Ok(project)
+
+    }
+
+    /// Validates and parses the string and, if possible, returns a Project instance
+    //TODO: has to return results
+    pub fn parse_string(contents: &str) -> std::io::Result<Project>{
+
+        //TODO: add better error handling
+        let project: Project = toml::from_str(contents).unwrap();
+        println!("Project name: {}", project.name);
+        Ok(project)
     }
 
     /// Compiles self and returns a result with a reference to self

@@ -9,8 +9,8 @@ fn main() {
 
     let matches = App::new("Jargo - a minimalist java project manager")
                         .version("0.0.1")
-                        .author("Nicolas Mohr <Nico.Mohr@gmx.net")
-                        .about("Runs, tests and configures your javaproject from the command line")
+                        .author("Nicolas Mohr <Nico.Mohr@gmx.net>")
+                        .about("Run, test and configure your java project from the command line")
                         //jargo --new PROJECT_NAME
                         .arg(Arg::with_name("new")
                             .short("n")
@@ -18,34 +18,34 @@ fn main() {
                             .case_insensitive(true)
                             .value_name("PROJECT_NAME")
                             .takes_value(true)
-                            .help("creates a new jargo project"))
+                            .help("Creates a new jargo project"))
                         //jargo --run
                         .arg(Arg::with_name("run")
                             .short("r")
                             .long("run")
                             .case_insensitive(true)
                             .takes_value(false)
-                            .help("runs the current jargo project"))
+                            .help("Runs the current jargo project"))
                         //jargo --build
                         .arg(Arg::with_name("build")
                             .short("b")
                             .long("build")
                             .case_insensitive(true)
                             .takes_value(false)
-                            .help("builds the current jargo project"))
+                            .help("Builds the current jargo project"))
                         //jargo --check
                         .arg(Arg::with_name("check")
                             .long("check")
                             .case_insensitive(true)
                             .takes_value(false)
-                            .help("recursively searches for a jargo.toml file in the current directory"))
+                            .help("Recursively searches for a valid jargo.toml file in the current dir"))
                         //jargo --clean
                         .arg(Arg::with_name("clean")
                             .short("c")
                             .long("clean")
                             .case_insensitive(true)
                             .takes_value(false)
-                            .help("cleans the current jargo project target directory"))
+                            .help("Cleans the current jargo project target directory"))
                         .get_matches();
                 
 
