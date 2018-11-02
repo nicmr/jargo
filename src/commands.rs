@@ -75,27 +75,24 @@ br#"class Main{
 }
 
 /// Checks if the current directory contains a valid project and runs  it
-pub fn run_project(pass_args: &str) -> std::io::Result<()> {
+pub fn run_project(_pass_args: &str) -> std::io::Result<()> {
     //TODO: consider using different result type
 
     let current_dir = env::current_dir()?;
 
 
     //1. validate and compile
-    if let Ok(project) = compile_project(current_dir, String::from("")){
+    if let Ok(_project) = compile_project(&current_dir, String::from("")){
         //2. run
 
         
     }
     
-
-    
-
     Ok(())
 }
 
 /// Checks if the current directory contains a valid project and compiles it
-pub fn compile_project(path: PathBuf, compiler_flags: String) -> std::io::Result<Project> {
+pub fn compile_project(path: &PathBuf, _compiler_flags: String) -> std::io::Result<Project> {
 
     let project = check_project(path)?;
     project.compile()?;
@@ -104,10 +101,10 @@ pub fn compile_project(path: PathBuf, compiler_flags: String) -> std::io::Result
 
 
 /// Checks if the current directory contains a valid project
-pub fn check_project(path: PathBuf) -> std::io::Result<Project> {
+pub fn check_project(path: &PathBuf) -> std::io::Result<Project> {
     // iterate through current dirs
    
-    let entries = fs::read_dir(path.clone())?;
+    let entries = fs::read_dir(path)?;
     for entry in entries {
         if let Ok(entry) = entry {
             //search for jargo.toml

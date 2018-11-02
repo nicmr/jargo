@@ -1,5 +1,5 @@
 use serde_derive::{Serialize, Deserialize};
-
+use std::fs;
 
 
 
@@ -11,7 +11,7 @@ pub struct Project {
     entry_point: String,
 }
 impl Project{
-    // Returns a new `Project` instance
+    /// Returns a new `Project` instance
     pub fn new(name: String, src_dir: String, target_dir: String, entry_point: String) -> Project{
         Project{
             name,
@@ -22,7 +22,7 @@ impl Project{
     }
 
 
-        ///Reads the specified file to a String and parses it by calling `parse()`
+    ///Reads the specified file to a String and parses it by calling `parse()`
     pub fn parse_file(path: std::path::PathBuf) -> std::io::Result<Project>{
         use std::fs::File;
         use std::io::Read;
@@ -42,12 +42,38 @@ impl Project{
 
         //TODO: add better error handling
         let project: Project = toml::from_str(contents).unwrap();
+
         println!("Project name: {}", project.name);
         Ok(project)
     }
 
-    /// Compiles self and returns a result with a reference to self
+    /// Compiles files in self.src_dir and places binaries in self.target_dir
+    /// Returns a result to indicate successful compilation
     pub fn compile(&self) -> std::io::Result<()> {
+        use regex::Regex;
+
+        let entries = fs::read_dir(&self.src_dir)?;
+
+        let re = Regex::new(r"[\w]+\.java").unwrap();
+        for entry in entries {
+            if let Ok(entry) = entry {
+                if let Some(filename) = &entry.file_name().to_str(){
+                    //match .java files
+                    if re.is_match(filename) {
+                        println!("compiling {}...", filename);
+                    } else {
+                        println!("ignoring {}", filename);
+                    }
+                } else {
+                    println!("unable to parse filename {:?}", entry.file_name());
+                }
+            }
+        }
+        Ok(())
+
+    }
+
+    pub fn clean(&self) -> std::io::Result<()>{
         Ok(())
     }
 
@@ -58,7 +84,7 @@ impl Project{
 }
 
 
-//Builder pattern to achieve quasi-optional parameters
+/// Builder pattern struct to achieve quasi-optional parameters for struct `Project`
 #[derive(Debug, Clone)]
 pub struct ProjectBuilder{
     name: String,

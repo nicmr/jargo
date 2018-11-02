@@ -73,7 +73,7 @@ fn main() {
             }
 
             if matches.is_present("build"){
-                if let Err(_) = commands::compile_project(PathBuf::from(""), String::from("")){
+                if let Err(_) = commands::compile_project(&currentdir, String::from("")){
                     println!("Failed to compile project.");
                 }
             }
@@ -85,7 +85,7 @@ fn main() {
             }
 
             if matches.is_present("check"){
-                if let Err(_) = commands::check_project(currentdir){
+                if let Err(_) = commands::check_project(&currentdir){
                     println!("Failed to find a jargo.toml.");
                 }
             }
