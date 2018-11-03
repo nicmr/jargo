@@ -79,7 +79,7 @@ fn main() {
             }
 
             if matches.is_present("clean"){
-                if let Err(_) = commands::clean_project(PathBuf::from("")){
+                if let Err(_) = commands::clean_project(&currentdir){
                     println!("Failed to clean project.");
                 }
             }

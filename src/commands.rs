@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 use std::io;
-use crate::project::{Project, ProjectBuilder};
+use crate::project::{Project, ProjectData, ProjectDataBuilder};
 use std::path::PathBuf;
 
 /// Creates a new project directory, src subfolder and jango.toml
@@ -16,13 +16,13 @@ pub fn new_project(project_name: &str) -> std::io::Result<()> {
     println!("Trying to create '{}' project under '{}' ...", project_name, root.display());
 
     if let Err(e) = DirBuilder::new().create(root.clone()){
-        println!("A directory with that name already exists."); 
+        println!("A directory/project with that name already exists."); 
         return Err(e);
     };
 
 
     //create Project struct
-    let project = ProjectBuilder::new(project_name.to_string()).build();
+    let projectdata = ProjectDataBuilder::new(project_name.to_string()).build();
 
     //create jargo.toml, which stores a serialized version of the project struct
     let mut tomlpath = root.clone();
@@ -30,16 +30,13 @@ pub fn new_project(project_name: &str) -> std::io::Result<()> {
     tomlpath.set_extension("toml");
     let mut toml = File::create(tomlpath)?;
 
-    let serialized = project.serialize();
+    let serialized = projectdata.serialize();
     match serialized{
         Ok(string) => toml.write_all(string.as_bytes())?,
         Err(e) => {
             println!("failed to serialise project settings. error message: {}", e)
         }
     }
-
-
-
 
     //create src dir
     let mut srcpath = root.clone();
@@ -100,17 +97,23 @@ pub fn compile_project(path: &PathBuf, _compiler_flags: String) -> std::io::Resu
 }
 
 
-/// Checks if the current directory contains a valid project
+/// Checks if the directory at `path` contains a valid project
 pub fn check_project(path: &PathBuf) -> std::io::Result<Project> {
-    // iterate through current dirs
-   
+    
+    // iterate through entries in path
     let entries = fs::read_dir(path)?;
     for entry in entries {
         if let Ok(entry) = entry {
+
             //search for jargo.toml
             if entry.file_name() == "jargo.toml" {
                 println!("valid project toml found at: {:?}", entry.path());
-                return Ok(Project::parse_file(entry.path())?);
+
+                //read project data from jargo.toml
+                let project_data = ProjectData::parse_file(entry.path())?;
+
+                //return new Project instance
+                return Ok(Project::new(project_data, path.to_owned()))
             }
         }
     }
@@ -119,6 +122,8 @@ pub fn check_project(path: &PathBuf) -> std::io::Result<Project> {
 
 /// Checks if the current directory contains a valid project, parses the toml and
 // cleans the target directory
-pub fn clean_project(path: PathBuf) -> std::io::Result<()> { 
+pub fn clean_project(path: &PathBuf) -> std::io::Result<()> { 
+    let project = check_project(path)?;
+    project.clean()?;
     Ok(())
 }
