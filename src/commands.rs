@@ -1,7 +1,8 @@
 use std::env;
 use std::fs;
 use std::io;
-use crate::project::{Project, ProjectData, ProjectDataBuilder};
+use crate::project::{Project};
+use crate::project::projectdata::{ProjectData, ProjectDataBuilder};
 use std::path::PathBuf;
 
 /// Creates a new project directory, src subfolder and jango.toml
