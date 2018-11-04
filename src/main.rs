@@ -2,7 +2,6 @@ mod commands;
 mod project;
 
 use clap::{Arg, App,};
-use std::path::PathBuf;
 use std::env;
 
 fn main() {

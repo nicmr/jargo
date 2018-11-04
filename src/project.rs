@@ -67,6 +67,23 @@ impl Project {
             
     }
 
+    pub fn run(&self) -> std::io::Result<()> {
+        //use std::process::Command;
+
+        // Convert entry point from FILENAME.java to FILENAME.class
+        let len = self.data.entry_point.len();
+        let mut entry_point = self.data.entry_point.clone();
+        entry_point.replace_range(len.saturating_sub(4).., "class");
+        println!("entry point: {}", entry_point);
+
+        // Assemble the absolute path of the entry point .class file
+        let mut entry_point_path = self.absolute_path.clone();
+        entry_point_path.push(&self.data.target_dir);
+        entry_point_path.push(entry_point);
+        println!("entry point path: {:?}", entry_point_path);
+
+        Ok(())
+    }
     /// Removes all files in self.data.target_dir (the target directory)
     pub fn clean(&self) -> std::io::Result<()>{
 
@@ -84,17 +101,17 @@ impl Project {
             }
         }
 
-        to_be_deleted
-            .iter()
-            .for_each(|x| println!("{:?}", x));
-
         // to_be_deleted
         //     .iter()
-        //     .for_each(|x| {
-        //         if let Err(e) = fs::remove_file(x){
-        //             println!("Issue deleting file from target/ : {}", e)
-        //         }     
-        //     });
+        //     .for_each(|x| println!("{:?}", x));
+
+        to_be_deleted
+            .iter()
+            .for_each(|x| {
+                if let Err(e) = fs::remove_file(x){
+                    println!("Issue deleting file from target/ : {}", e)
+                }     
+            });
         Ok(())
     }
 }
@@ -169,7 +186,7 @@ impl ProjectDataBuilder{
             name,
             src_dir: String::from("src"),
             target_dir: String::from("target"),
-            entry_point:String::from("src/Main.java")
+            entry_point:String::from("Main.java")
         }
     }
 

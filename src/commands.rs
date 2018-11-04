@@ -79,8 +79,10 @@ pub fn run_project(_pass_args: &str) -> std::io::Result<()> {
 
 
     //1. validate and compile
-    if let Ok(_project) = compile_project(&current_dir, String::from("")){
+    if let Ok(project) = compile_project(&current_dir, String::from("")){
         //2. run
+        project.run();
+
 
         
     }
