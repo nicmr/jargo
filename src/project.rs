@@ -68,20 +68,33 @@ impl Project {
     }
 
     pub fn run(&self) -> std::io::Result<()> {
-        //use std::process::Command;
+        use std::process::Command;
+        use std::str;
 
-        // Convert entry point from FILENAME.java to FILENAME.class
+        // Convert entry point from FILENAME.java to FILENAME
         let len = self.data.entry_point.len();
         let mut entry_point = self.data.entry_point.clone();
-        entry_point.replace_range(len.saturating_sub(4).., "class");
+        entry_point.replace_range(len.saturating_sub(4).., "");
         println!("entry point: {}", entry_point);
 
-        // Assemble the absolute path of the entry point .class file
-        let mut entry_point_path = self.absolute_path.clone();
-        entry_point_path.push(&self.data.target_dir);
-        entry_point_path.push(entry_point);
-        println!("entry point path: {:?}", entry_point_path);
+        // Assemble the absolute path of target path to add it to the class path
+        let mut target_path = self.absolute_path.clone();
+        target_path.push(&self.data.target_dir);
+        println!("target path: {}", target_path.to_str().unwrap());
 
+        let java_output = Command::new("java")
+            .arg("-cp")
+            .arg(target_path.to_str().unwrap()) //TODO: FIX evil unwrap
+            .arg(entry_point)
+            .output();
+
+        match java_output { 
+            Ok(output) => {
+                println!("stdout: {:?}", str::from_utf8(&output.stdout));
+                println!("stderr: {:?}", str::from_utf8(&output.stderr));
+            },
+            Err(e) => println!("java process crashed with error: {}", e),
+        };
         Ok(())
     }
     /// Removes all files in self.data.target_dir (the target directory)
@@ -115,8 +128,3 @@ impl Project {
         Ok(())
     }
 }
-
-
-
-
-
