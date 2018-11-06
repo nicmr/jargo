@@ -74,7 +74,7 @@ impl Project {
         // Convert entry point from FILENAME.java to FILENAME
         let len = self.data.entry_point.len();
         let mut entry_point = self.data.entry_point.clone();
-        entry_point.replace_range(len.saturating_sub(4).., "");
+        entry_point.replace_range(len.saturating_sub(5).., "");
         println!("entry point: {}", entry_point);
 
         // Assemble the absolute path of target path to add it to the class path
@@ -84,8 +84,8 @@ impl Project {
 
         let java_output = Command::new("java")
             .arg("-cp")
-            .arg(target_path.to_str().unwrap()) //TODO: FIX evil unwrap
-            .arg(entry_point)
+            .arg(target_path.to_str().unwrap()) //TODO: remove evil unwrap
+            .arg(&entry_point)
             .output();
 
         match java_output { 
