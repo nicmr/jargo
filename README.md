@@ -45,7 +45,7 @@ class Main{
 $ ~/code/foo %    jargo --run
 > Hello, world!
 ```
-Note: Run will automatically build the project, there is no need to use more than one command for a single tasks
+Note: Run will automatically build the project, no need to run `jargo --build` in advance
 
 
 ## 2. Project structure
